@@ -9,11 +9,11 @@ namespace InmobiliariaPro2.Models
         [Required (ErrorMessage ="La direccion es Requerida")]
         public string? Direccion{get;set;}
         [Range(1,int.MaxValue ,ErrorMessage ="La capasidad debe ser minimo 1")]
-        public int Capasidad {get;set;}
+        public int Capacidad {get;set;}
 
         public TipoInmueble TipoInmueble{get; set;}=new TipoInmueble();
         [Required(ErrorMessage ="Debe seleccionar un tipo de inmueble")]
-        public int IdtTipoInmueble{get;set;}
+        public int IdTipoInmueble{get;set;}
 
         [Required(ErrorMessage = "La latitud debe estar entre -90 y 90")]
         [Range(-90, 90, ErrorMessage = "La latitud debe ser entre -90 y 90")]
@@ -32,7 +32,7 @@ namespace InmobiliariaPro2.Models
         public Propietario propietario {get;set;} =new Propietario();
         [Required(ErrorMessage ="Debe elegir un porcentaje")]
         [Range(10,100,ErrorMessage ="El porcentaje se debe encontrar entre el 10% y 100%")]
-        public decimal PorcentajeDeReserva{get;set;}
+        public decimal PorcentajeReserva{get;set;}
 
         public string? ImagenUrl{get;set;}
 
@@ -40,7 +40,7 @@ namespace InmobiliariaPro2.Models
 
         public IList<Imagen> ListaImagenes {get;set;}=new List<Imagen>(); 
 
-        public int CantidadDeReservas {get;set;}
+        public int CantidadReservas {get;set;}
 
         public IList<Reserva>ListaReservas {get;set;}=new List<Reserva>();
 

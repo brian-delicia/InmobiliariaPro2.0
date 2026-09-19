@@ -1,0 +1,265 @@
+
+using System.Data;
+using MySqlConnector;
+
+
+namespace InmobiliariaPro2.Models
+{
+    public class RepositorioUsuarioMySql : RepositorioBase, IRepositorioUsuario
+    {
+
+        public RepositorioUsuarioMySql(IConfiguration configuration) : base(configuration)
+        {
+
+        }
+
+
+        public int Alta(Usuario usuario)
+        {
+            int res = -1;
+
+            using var connection = new MySqlConnection(connectionString);
+
+            string sql = """
+            INSERT INTO Usuarios(UserName,Password,RolUsuario,Estado, Avatar)
+            VALUES(@UserName,@Password,@RolUsuario,@Estado,@Avatar);
+
+            SELECT LAST_INSERT_ID();
+            """;
+            using var command = new MySqlCommand(sql, connection);
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@UserName", usuario.Email);
+            command.Parameters.AddWithValue("@Password", usuario.Password);
+            command.Parameters.AddWithValue("@RolUsuario", (int)usuario.RolUsuario);
+            command.Parameters.AddWithValue("@Estado", usuario.Estado);
+            command.Parameters.AddWithValue("@Avatar",usuario.Avatar);
+
+            connection.Open();
+
+            res = Convert.ToInt32(command.ExecuteScalar());
+
+            usuario.IdUsuario = res;
+
+            return res;
+        }
+        public int Baja(int id)
+        {
+            int res = -1;
+            using var connection = new MySqlConnection(connectionString);
+
+            string sql = """
+            UPDATE Usuarios
+            SET Estado= false
+            WHERE IdUsuario= @IdUsuario
+            """;
+            using var command = new MySqlCommand(sql, connection);
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@IdUsuario", id);
+
+            connection.Open();
+            res = command.ExecuteNonQuery();
+            return res;
+        }
+
+        public int Modificacion(Usuario usuario)
+        {
+            int res = -1;
+            using var connection = new MySqlConnection(connectionString);
+
+            string sql = """
+                UPDATE Usuarios
+                SET UserName = @UserName,
+                    Password = @Password,
+                    RolUsuario = @RolUsuario,
+                    Estado = @Estado,
+                    Avatar=@Avatar
+                WHERE IdUsuario = @IdUsuario;
+                """;
+            using var command = new MySqlCommand(sql, connection);
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@UserName", usuario.Email);
+            command.Parameters.AddWithValue("@Password", usuario.Password);
+            command.Parameters.AddWithValue("@RolUsuario", (int)usuario.RolUsuario); // Casteo del Enum a int
+            command.Parameters.AddWithValue("@Estado", usuario.Estado);
+            command.Parameters.AddWithValue("@avatar", (object?)usuario.Avatar ?? DBNull.Value);
+            command.Parameters.AddWithValue("@IdUsuario", usuario.IdUsuario);
+
+            connection.Open();
+            res = command.ExecuteNonQuery();
+            return res;
+        }
+
+        public int Reactivar(int id)
+        {
+            int res = -1;
+            using var connection = new MySqlConnection(connectionString);
+
+            string sql = """
+                UPDATE Usuarios
+                SET Estado = true
+                WHERE IdUsuario = @IdUsuario;
+                """;
+            using var command = new MySqlCommand(sql, connection);
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.AddWithValue("@IdUsuario", id);
+            connection.Open();
+            res = command.ExecuteNonQuery();
+            return res;
+        }
+
+        public IList<Usuario> ObtenerActivos(int pagina = 1, int tamPagina = 10)
+        {
+            IList<Usuario> res = new List<Usuario>();
+            using var connection = new MySqlConnection(connectionString);
+
+
+            string sql = $"""
+                     SELECT IdUsuario, UserName, Password, RolUsuario, Estado,Avatar
+                     FROM Usuarios
+                     WHERE Estado = 1
+                     LIMIT {tamPagina} 
+                    OFFSET {(pagina - 1) * tamPagina};
+                    """;
+            using var command = new MySqlCommand(sql, connection);
+
+            connection.Open();
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                res.Add(MapearUsuario(reader));
+            }
+            return res;
+        }
+
+        public IList<Usuario> ObtenerInactivos(int pagina = 1, int tamPagina = 10)
+        {
+            IList<Usuario> res = new List<Usuario>();
+            using var connection = new MySqlConnection(connectionString);
+
+
+            string sql = $"""
+                 SELECT IdUsuario, UserName, Password, RolUsuario, Estado,Avatar
+                FROM Usuarios
+                WHERE Estado = 0
+                LIMIT {tamPagina} 
+                OFFSET {(pagina - 1) * tamPagina};
+             """;
+            using var command = new MySqlCommand(sql, connection);
+
+            connection.Open();
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                res.Add(MapearUsuario(reader));
+            }
+            return res;
+        }
+
+        public int ObtenerCantidad(bool? soloActivos = true)
+        {
+            int res = 0;
+            using var connection = new MySqlConnection(connectionString);
+
+
+            string sql = "SELECT COUNT(*) FROM Usuarios";
+            if (soloActivos.HasValue)
+            {
+                sql += " WHERE Estado = @Estado;";
+            }
+
+            using var command = new MySqlCommand(sql, connection);
+            if (soloActivos.HasValue)
+            {
+                command.Parameters.AddWithValue("@Estado", soloActivos.Value);
+            }
+
+            connection.Open();
+            res = Convert.ToInt32(command.ExecuteScalar());
+            return res;
+        }
+
+        public Usuario ObtenerPorId(int id)
+        {
+            Usuario? usuario = null;
+            using var connection = new MySqlConnection(connectionString);
+
+            string sql = """
+                SELECT IdUsuario, UserName, Password, RolUsuario, Estado,Avatar
+                FROM Usuarios
+                WHERE IdUsuario = @IdUsuario;
+                """;
+            using var command = new MySqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@IdUsuario", id);
+
+            connection.Open();
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                usuario = MapearUsuario(reader);
+            }
+            return usuario;
+        }
+
+        private Usuario MapearUsuario(MySqlDataReader reader)
+        {
+            return new Usuario
+            {
+                IdUsuario = reader.GetInt32("IdUsuario"),
+                Email = reader.GetString("UserName"),
+                Password = reader.GetString("Password"),
+                RolUsuario = (RolUsuario)reader.GetInt32("RolUsuario"), // Casteo del int de la BD al Enum
+                Estado = reader.GetBoolean("Estado"),
+                Avatar=reader.IsDBNull(reader.GetOrdinal("Avatar")) 
+                    ? null 
+                    : reader.GetString("Avatar"),
+                ListaReservas = new List<Reserva>() // Inicializada vacía 
+            };
+        }
+
+        public Usuario? ObtenerPorUserName(string userName)
+        {
+            Usuario? usuario = null;
+
+            using var connection = new MySqlConnection(connectionString);
+
+            string sql = """
+        SELECT IdUsuario, UserName, Password, RolUsuario, Estado,Avatar
+        FROM Usuarios
+        WHERE UserName = @UserName;
+        """;
+
+            using var command = new MySqlCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@UserName", userName);
+
+            connection.Open();
+
+            using var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                usuario = MapearUsuario(reader);
+            }
+
+            return usuario;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+};

@@ -8,7 +8,7 @@ namespace InmobiliariaPro2.Models
         [Required]
         public string? Url {get;set;}
         [Required]
-        public int IdImueble {get;set;}
+        public int IdInmueble {get;set;}
          public IFormFile? Archivo {get; set;}
 
      }

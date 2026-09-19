@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "ZK4CWaEuc04=",
+  "dgSpecHash": "EVGA5rmzLf4=",
   "success": true,
   "projectFilePath": "C:\\Users\\Brian D\\Documents\\Html1\\InmobiliariaPro2.0\\InmobiliariaPro2.0.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Brian D\\.nuget\\packages\\mysqlconnector\\2.6.2\\mysqlconnector.2.6.2.nupkg.sha512"
+  ],
   "logs": []
 }
