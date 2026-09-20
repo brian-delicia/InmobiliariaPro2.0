@@ -1,0 +1,97 @@
+@model List<InmobiliariaPro2.Models.Propietario>
+
+@{
+    ViewData["Title"] = "Propietarios Inactivos";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Propietarios Inactivos</h1>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            Volver a Propietarios
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            No hay propietarios inactivos registrados.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+
+            <table class="table table-striped table-hover align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>DNI</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var propietario in Model)
+                    {
+                        <tr>
+                            <td>@propietario.IdPropietario</td>
+                            <td>@propietario.Dni</td>
+                            <td>@propietario.Nombre</td>
+                            <td>@propietario.Apellido</td>
+                            <td>@propietario.Telefono</td>
+                            <td>@propietario.Email</td>
+
+                            <td class="text-center">
+
+                                <form asp-action="Reactivar" asp-route-id="@propietario.IdPropietario" method="post"
+                                    class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success btn-sm;">
+                                        Reactivar / Alta
+                                    </button>
+
+
+
+
+
+
+                                </form>
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- Botones de Paginación -->
+
+        <div class="mt-3 text-center">
+            @if (ViewBag.PaginaActual > 1)
+            {
+                <a asp-action="Inactivos" asp-route-pagina="@(ViewBag.PaginaActual - 1)"
+                    class="btn btn-outline-primary me-2">Anterior</a>
+            }
+
+            @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+            {
+                <a asp-action="Inactivos" asp-route-pagina="@(ViewBag.PaginaActual + 1)"
+                    class="btn btn-outline-primary">Siguiente</a>
+            }
+        </div>
+
+    }
+
+</div>

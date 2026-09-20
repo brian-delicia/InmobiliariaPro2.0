@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Text;
 using InmobiliariaPro2.Models;
 
-namespace Grupo18_Inmobiliaria
+namespace InmobiliariaPro2
 {
     public static class DbSeeder
     {

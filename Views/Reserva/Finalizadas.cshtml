@@ -1,0 +1,97 @@
+@model IList<InmobiliariaPro2.Models.Reserva>
+
+@{
+    ViewData["Title"] = "Reservas Finalizadas";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Reservas Finalizadas</h1>
+
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                Volver a Reservas Activas
+            </a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            No hay reservas finalizadas.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped table-bordered">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Monto diario</th>
+                    <th>Fecha inicio</th>
+                    <th>Fecha fin</th>
+                    <th>Inquilino</th>
+                    <th>Inmueble</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var reserva in Model)
+                {
+                    <tr>
+                        <td>
+                            @reserva.IdReserva
+                        </td>
+
+                        <td>
+                            $@reserva.MontoDiario
+                        </td>
+
+                        <td>
+                            @reserva.FechaInicio.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+                            @reserva.FechaFin.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+                            @reserva.Inquilino.Nombre @reserva.Inquilino.Apellido
+                        </td>
+
+                        <td>
+                            @reserva.Inmueble.Direccion
+                        </td>
+
+                        <td class="text-center">
+                            <a asp-action="Details" asp-route-id="@reserva.IdReserva" class="btn btn-info btn-sm text-white">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+        <!-- PAGINACIÓN -->
+        <div class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination">
+                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                            <a class="page-link" asp-action="Finalizadas" asp-route-pagina="@i" asp-route-tamPagina="10">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+
+</div>
